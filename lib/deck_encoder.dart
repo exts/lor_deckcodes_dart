@@ -21,12 +21,12 @@ class DeckEncoder {
     });
 
     intIdentifierToFactionCode.addAll({
-      0 : 'DE',
-      1 : 'FR',
-      2 : 'IO',
-      3 : 'NX',
-      4 : 'PZ',
-      5 : 'SI',
+      0: 'DE',
+      1: 'FR',
+      2: 'IO',
+      3: 'NX',
+      4: 'PZ',
+      5: 'SI',
     });
   }
 
@@ -36,10 +36,9 @@ class DeckEncoder {
     List<int> bytes;
 
     try {
-
       // original code strips padding, so we gotta add it back
       int padding = 8 - (code.length % 8);
-      if(padding > 0 && padding != 8) {
+      if (padding > 0 && padding != 8) {
         code += ('=' * padding);
       }
 
@@ -55,24 +54,26 @@ class DeckEncoder {
     int version = bytes[0] & 0xF;
     byteList.removeAt(0);
 
-    if(version > MAX_KNOWN_VERSION) {
-      throw ArgumentError("The provided code requires a higher version of this library; please update.");
+    if (version > MAX_KNOWN_VERSION) {
+      throw ArgumentError(
+          "The provided code requires a higher version of this library; please update.");
     }
 
-    for(int i = 3; i > 0; i--) {
+    for (int i = 3; i > 0; i--) {
       var numbGroupOfs = VarintTranslator.popVarint(byteList);
-      for(int j = 0; j < numbGroupOfs; j++) {
+      for (int j = 0; j < numbGroupOfs; j++) {
         var numOfsInThisGroup = VarintTranslator.popVarint(byteList);
         var sett = VarintTranslator.popVarint(byteList);
         var faction = VarintTranslator.popVarint(byteList);
-        for(int k = 0; k < numOfsInThisGroup; k++) {
+        for (int k = 0; k < numOfsInThisGroup; k++) {
           int card = VarintTranslator.popVarint(byteList);
 
           String setString = sett.toString().padLeft(2, '0');
           String factionString = intIdentifierToFactionCode[faction];
           String cardString = card.toString().padLeft(3, '0');
 
-          var newEntry = CardCodeAndCount("$setString$factionString$cardString", i);
+          var newEntry =
+              CardCodeAndCount("$setString$factionString$cardString", i);
           result.add(newEntry);
         }
       }
@@ -81,17 +82,20 @@ class DeckEncoder {
     //the remainder of the deck code is comprised of entries for cards with counts >= 4
     //this will only happen in Limited and special game modes.
     //the encoding is simply [count] [cardcode]
-    while(byteList.isNotEmpty) {
+    while (byteList.isNotEmpty) {
       int fourPlusCount = VarintTranslator.popVarint(byteList);
       int fourPlusSet = VarintTranslator.popVarint(byteList);
       int fourPlusFaction = VarintTranslator.popVarint(byteList);
       int fourPlusNumber = VarintTranslator.popVarint(byteList);
 
       String fourPlusSetString = fourPlusSet.toString().padLeft(2, '0');
-      String fourPlusFactionString = intIdentifierToFactionCode[fourPlusFaction];
+      String fourPlusFactionString =
+          intIdentifierToFactionCode[fourPlusFaction];
       String fourPlusNumberString = fourPlusNumber.toString().padLeft(3, '0');
 
-      var newEntry = CardCodeAndCount(fourPlusSetString + fourPlusFactionString + fourPlusNumberString, fourPlusCount);
+      var newEntry = CardCodeAndCount(
+          fourPlusSetString + fourPlusFactionString + fourPlusNumberString,
+          fourPlusCount);
       result.add(newEntry);
     }
 
@@ -103,14 +107,14 @@ class DeckEncoder {
 
     // remove padding
     encoded = encoded.replaceAll(RegExp(r"[=]*$"), "");
-    
+
     return encoded;
   }
 
   List<int> getDeckCodeBytes(List<CardCodeAndCount> deck) {
     var result = List<int>();
 
-    if(!validCardCodesAndCounts(deck)) {
+    if (!validCardCodesAndCounts(deck)) {
       throw ArgumentError("The provided deck contains invalid card codes.");
     }
 
@@ -121,15 +125,16 @@ class DeckEncoder {
     var of1 = List<CardCodeAndCount>();
     var ofN = List<CardCodeAndCount>();
 
-    for(var ccc in deck) {
-      if(ccc.Count == 3) {
+    for (var ccc in deck) {
+      if (ccc.Count == 3) {
         of3.add(ccc);
-      } else if(ccc.Count == 2) {
+      } else if (ccc.Count == 2) {
         of2.add(ccc);
-      } else if(ccc.Count == 1) {
+      } else if (ccc.Count == 1) {
         of1.add(ccc);
       } else if (ccc.Count < 1) {
-        throw ArgumentError("Invalid count of ${ccc.Count} for card ${ccc.CardCode}");
+        throw ArgumentError(
+            "Invalid count of ${ccc.Count} for card ${ccc.CardCode}");
       } else {
         ofN.add(ccc);
       }
@@ -160,7 +165,7 @@ class DeckEncoder {
   }
 
   encodeNOfs(List<int> bytes, List<CardCodeAndCount> nOfs) {
-    for(var ccc in nOfs) {
+    for (var ccc in nOfs) {
       bytes.addAll(VarintTranslator.getVarint(ccc.Count));
 
       var setNumber = getCardSet(ccc.CardCode);
@@ -178,9 +183,10 @@ class DeckEncoder {
   //The sorting convention of this encoding scheme is
   //First by the number of set/faction combinations in each top-level list
   //Second by the alphanumeric order of the card codes within those lists.
-  List<List<CardCodeAndCount>> sortGroupOf(List<List<CardCodeAndCount>> groupOf) {
+  List<List<CardCodeAndCount>> sortGroupOf(
+      List<List<CardCodeAndCount>> groupOf) {
     groupOf.sort((a, b) => a.length.compareTo(b.length));
-    for(var i = 0; i < groupOf.length; i++) {
+    for (var i = 0; i < groupOf.length; i++) {
       groupOf[i].sort((a, b) => a.CardCode.compareTo(b.CardCode));
       groupOf[i] = groupOf[i].toList();
     }
@@ -190,7 +196,7 @@ class DeckEncoder {
   int getCardSet(String code) {
     return int.parse(code.substring(0, 2));
   }
-  
+
   String getCardFaction(String code) {
     return code.substring(2, 4);
   }
@@ -201,24 +207,25 @@ class DeckEncoder {
 
   List<List<CardCodeAndCount>> getGroupedOfs(List<CardCodeAndCount> list) {
     List<List<CardCodeAndCount>> result = List<List<CardCodeAndCount>>();
-    while(list.isNotEmpty) {
+    while (list.isNotEmpty) {
       List<CardCodeAndCount> currentSet = List<CardCodeAndCount>();
 
       //get info from first
       var firstCardCode = list[0].CardCode;
-      
+
       int setNumber = getCardSet(firstCardCode);
       String factionCode = getCardFaction(firstCardCode);
 
       currentSet.add(list[0]);
       list.removeAt(0);
 
-      for(var i = list.length - 1; i >= 0; i--) {
+      for (var i = list.length - 1; i >= 0; i--) {
         String currentCardCode = list[i].CardCode;
         int currentSetNumber = getCardSet(currentCardCode);
         String currentFactionCode = getCardFaction(currentCardCode);
 
-        if(currentSetNumber == setNumber && currentFactionCode == factionCode) {
+        if (currentSetNumber == setNumber &&
+            currentFactionCode == factionCode) {
           currentSet.add(list[i]);
           list.removeAt(i);
         }
@@ -230,7 +237,7 @@ class DeckEncoder {
 
   void encodeGroupOf(List<int> bytes, List<List<CardCodeAndCount>> groupOf) {
     bytes.addAll(VarintTranslator.getVarint(groupOf.length));
-    for(var currentList in groupOf) {
+    for (var currentList in groupOf) {
       // how many cards in group?
       bytes.addAll(VarintTranslator.getVarint(currentList.length));
 
@@ -243,7 +250,7 @@ class DeckEncoder {
       bytes.addAll(VarintTranslator.getVarint(currentFactionNumber));
 
       // what are the cards, as identified by the third section of card code only now, within this group?
-      for(var cd in currentList) {
+      for (var cd in currentList) {
         var code = cd.CardCode;
         var sequenceNumber = int.parse(code.substring(4, 7));
         bytes.addAll(VarintTranslator.getVarint(sequenceNumber));
@@ -252,26 +259,26 @@ class DeckEncoder {
   }
 
   bool validCardCodesAndCounts(List<CardCodeAndCount> deck) {
-    for(var ccc in deck) {
-      if(ccc.CardCode.length != CARD_CODE_LENGTH) {
+    for (var ccc in deck) {
+      if (ccc.CardCode.length != CARD_CODE_LENGTH) {
         return false;
       }
 
       var parsed = ccc.CardCode.substring(0, 2);
-      if(int.tryParse(parsed) == null) {
+      if (int.tryParse(parsed) == null) {
         return false;
       }
 
       var faction = ccc.CardCode.substring(2, 4);
-      if(!factionCodeToIntIdentifier.containsKey(faction)) {
+      if (!factionCodeToIntIdentifier.containsKey(faction)) {
         return false;
       }
 
-      if(int.tryParse(ccc.CardCode.substring(4, 7)) == null) {
+      if (int.tryParse(ccc.CardCode.substring(4, 7)) == null) {
         return false;
       }
 
-      if(ccc.Count < 1) {
+      if (ccc.Count < 1) {
         return false;
       }
     }

@@ -33,12 +33,12 @@ class VarintTranslator {
     var currentShift = 0;
     var bytesPopped = 0;
 
-    for(int i = 0; i < bytes.length; i++) {
+    for (int i = 0; i < bytes.length; i++) {
       bytesPopped++;
       var current = bytes[i] & allButMsb;
       result |= current << currentShift;
 
-      if((bytes[i] & justMsb) != justMsb) {
+      if ((bytes[i] & justMsb) != justMsb) {
         bytes.removeRange(0, bytesPopped);
         return result;
       }
@@ -53,15 +53,15 @@ class VarintTranslator {
     var buff = List<int>.generate(10, (idx) => 0);
     var currentIndex = 0;
 
-    if(value == 0) {
+    if (value == 0) {
       return [0];
     }
 
-    while(value != 0) {
+    while (value != 0) {
       var byteVal = value & allButMsb;
       value >>= 7;
 
-      if(value != 0) {
+      if (value != 0) {
         byteVal |= 0x80;
       }
 
@@ -69,7 +69,7 @@ class VarintTranslator {
     }
 
     List<int> result = List.generate(currentIndex, (idx) => 0);
-    for(var i = 0; i < currentIndex; i++) {
+    for (var i = 0; i < currentIndex; i++) {
       result[i] = buff[i];
     }
 
