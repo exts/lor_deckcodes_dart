@@ -3,9 +3,6 @@ import 'package:base32/base32.dart';
 import 'package:lor_deck_codes/card_code_count.dart';
 import 'package:lor_deck_codes/varint_translator.dart';
 
-import 'varint_translator.dart';
-import 'varint_translator.dart';
-
 class DeckEncoder {
   static const int CARD_CODE_LENGTH = 7;
   static const int MAX_KNOWN_VERSION = 1;
@@ -54,7 +51,7 @@ class DeckEncoder {
     var byteList = bytes.toList();
 
     //grab format and version
-    int format = bytes[0] >> 4;
+    // int format = bytes[0] >> 4;
     int version = bytes[0] & 0xF;
     byteList.removeAt(0);
 
