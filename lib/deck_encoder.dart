@@ -45,7 +45,7 @@ class DeckEncoder {
 
       bytes = base32.decode(code);
     } on Exception catch (e) {
-      throw new ArgumentError("Invalid deck code: ${e} '${code}'");
+      throw ArgumentError("Invalid deck code: ${e} '${code}'");
     }
 
     var byteList = bytes.toList();
@@ -81,7 +81,7 @@ class DeckEncoder {
     //the remainder of the deck code is comprised of entries for cards with counts >= 4
     //this will only happen in Limited and special game modes.
     //the encoding is simply [count] [cardcode]
-    while(byteList.length > 0) {
+    while(byteList.isNotEmpty) {
       int fourPlusCount = VarintTranslator.popVarint(byteList);
       int fourPlusSet = VarintTranslator.popVarint(byteList);
       int fourPlusFaction = VarintTranslator.popVarint(byteList);
@@ -201,7 +201,7 @@ class DeckEncoder {
 
   List<List<CardCodeAndCount>> getGroupedOfs(List<CardCodeAndCount> list) {
     List<List<CardCodeAndCount>> result = List<List<CardCodeAndCount>>();
-    while(list.length > 0) {
+    while(list.isNotEmpty) {
       List<CardCodeAndCount> currentSet = List<CardCodeAndCount>();
 
       //get info from first

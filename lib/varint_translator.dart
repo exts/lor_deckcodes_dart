@@ -46,7 +46,7 @@ class VarintTranslator {
       currentShift += 7;
     }
 
-    throw new ArgumentError("Byte array did not contain valid varints.");
+    throw ArgumentError("Byte array did not contain valid varints.");
   }
 
   static List<int> getVarint(int value) {
