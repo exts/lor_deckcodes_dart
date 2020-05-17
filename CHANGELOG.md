@@ -18,3 +18,7 @@
 - Added bilgewater support
 - Added new bilgewater test
 - Added new bilgewater example
+
+## 1.0.4.1
+
+- Fix pubspec issue
