@@ -81,6 +81,19 @@ void main() {
 
     expect(code3.contains(code4), true);
   });
+
+  test("bildge water set test", () {
+    var decoder = DeckEncoder();
+    var deck = List<CardCodeAndCount>();
+    deck.add(CardCodeAndCount("01DE002", 4));
+    deck.add(CardCodeAndCount("02BW003", 2));
+    deck.add(CardCodeAndCount("02BW010", 3));
+    deck.add(CardCodeAndCount("01DE004", 5));
+
+    var code = decoder.getCodeFromDeck(deck);
+    var decoded = decoder.getDeckFromCode(code);
+    expect(verifyRehydration(deck, decoded), true);
+  });
 }
 
 bool verifyRehydration(List<CardCodeAndCount> d, List<CardCodeAndCount> rehydratedList) {

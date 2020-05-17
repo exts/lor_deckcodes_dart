@@ -5,7 +5,7 @@ import 'package:lor_deck_codes/varint_translator.dart';
 
 class DeckEncoder {
   static const int CARD_CODE_LENGTH = 7;
-  static const int MAX_KNOWN_VERSION = 1;
+  static const int MAX_KNOWN_VERSION = 2;
 
   Map<String, int> factionCodeToIntIdentifier = Map<String, int>();
   Map<int, String> intIdentifierToFactionCode = Map<int, String>();
@@ -18,6 +18,7 @@ class DeckEncoder {
       'NX': 3,
       'PZ': 4,
       'SI': 5,
+      'BW': 6,
     });
 
     intIdentifierToFactionCode.addAll({
@@ -27,6 +28,7 @@ class DeckEncoder {
       3: 'NX',
       4: 'PZ',
       5: 'SI',
+      6: 'BW',
     });
   }
 

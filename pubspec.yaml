@@ -1,5 +1,5 @@
 name: lor_deck_codes
-version: 1.0.3
+version: 1.0.4
 description: 'The LorDeckCodes library can be used to encode/decode Legends of Runeterra decks to/from simple strings.'
 homepage: https://github.com/exts/lor_deckcodes_dart
 
