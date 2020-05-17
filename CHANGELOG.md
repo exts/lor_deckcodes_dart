@@ -12,3 +12,9 @@
 - Fixed pub.dev warnings
 - Added changelog
 - Added .gitignore so it ignores my dart2native tests executables
+
+## 1.0.3
+
+- Added bilgewater support
+- Added new bilgewater test
+- Added new bilgewater example
