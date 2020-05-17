@@ -13,7 +13,7 @@
 - Added changelog
 - Added .gitignore so it ignores my dart2native tests executables
 
-## 1.0.3
+## 1.0.4
 
 - Added bilgewater support
 - Added new bilgewater test
