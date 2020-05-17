@@ -4,7 +4,7 @@ description: 'The LorDeckCodes library can be used to encode/decode Legends of R
 homepage: https://github.com/exts/lor_deckcodes_dart
 
 environment:
-  sdk: ">=2.0.0-dev.28.0 <3.0.0"
+  sdk: ">=2.0.0 <3.0.0"
 
 dependencies:
   base32: ^1.1.1
