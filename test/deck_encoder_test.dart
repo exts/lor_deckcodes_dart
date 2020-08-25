@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:base32/base32.dart';
 import 'package:lor_deck_codes/card_code_count.dart';
 import 'package:lor_deck_codes/deck_encoder.dart';
 import 'package:test/test.dart';
@@ -93,6 +95,39 @@ void main() {
     var code = decoder.getCodeFromDeck(deck);
     var decoded = decoder.getDeckFromCode(code);
     expect(verifyRehydration(deck, decoded), true);
+  });
+
+  test("mt targon set test", () {
+    var decoder = DeckEncoder();
+    var deck = List<CardCodeAndCount>();
+    deck.add(CardCodeAndCount("01DE002", 4));
+    deck.add(CardCodeAndCount("03MT003", 2));
+    deck.add(CardCodeAndCount("03MT010", 3));
+    deck.add(CardCodeAndCount("02BW004", 5));
+
+    var code = decoder.getCodeFromDeck(deck);
+    var decoded = decoder.getDeckFromCode(code);
+    expect(verifyRehydration(deck, decoded), true);
+  });
+
+  test("Bad Version test", () {
+    var decoder = DeckEncoder();
+    var deck = List<CardCodeAndCount>();
+    deck.add(CardCodeAndCount("01DE002", 4));
+    deck.add(CardCodeAndCount("01DE003", 2));
+    deck.add(CardCodeAndCount("02DE003", 3));
+    deck.add(CardCodeAndCount("01DE004", 5));
+
+    var bytesFromDeck = base32.decode(decoder.getCodeFromDeck(deck));
+    var result = List<int>();
+    result.add(88); // invalid version
+    var bytesFromDeckWithNewVersion = result + bytesFromDeck.getRange(1, bytesFromDeck.length).toList();
+
+    var badVersionDeckCode = base32.encode(Uint8List.fromList(bytesFromDeckWithNewVersion));
+    expect(
+      () => decoder.getDeckFromCode(badVersionDeckCode), 
+      throwsA(allOf(isArgumentError, predicate((e) => e.message == 'The provided code requires a higher version of this library; please update.')))
+    );
   });
 }
 

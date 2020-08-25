@@ -22,3 +22,9 @@
 ## 1.0.4.1
 
 - Fix pubspec issue
+
+## 1.0.5
+
+- Added support for Mt Targon
+- Added new Mt Targon test
+- Added new bad version test to mimic official repo

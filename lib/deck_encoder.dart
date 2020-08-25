@@ -19,6 +19,7 @@ class DeckEncoder {
       'PZ': 4,
       'SI': 5,
       'BW': 6,
+      'MT': 9,
     });
 
     intIdentifierToFactionCode.addAll({
@@ -29,6 +30,7 @@ class DeckEncoder {
       4: 'PZ',
       5: 'SI',
       6: 'BW',
+      9: 'MT',
     });
   }
 
@@ -120,7 +122,7 @@ class DeckEncoder {
       throw ArgumentError("The provided deck contains invalid card codes.");
     }
 
-    result.add(17);
+    result.add(18);
 
     var of3 = List<CardCodeAndCount>();
     var of2 = List<CardCodeAndCount>();
