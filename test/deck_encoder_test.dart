@@ -12,17 +12,17 @@ void main() {
     var file = File("test/fixtures/deckcodes.txt");
     var lines = file.readAsLinesSync();
 
-    var codes = List<String>();
-    var decks = List<List<CardCodeAndCount>>();
+    var codes = <String>[];
+    var decks = <List<CardCodeAndCount>>[];
 
-    var newDeck = List<CardCodeAndCount>();
+    var newDeck = <CardCodeAndCount>[];
     var code = true;
     for(var line in lines) {
       if(line.isEmpty && !code) {
         if(newDeck.length > 0) {
           decks.add(newDeck);
         }
-        newDeck = List<CardCodeAndCount>();
+        newDeck = <CardCodeAndCount>[];
         code = true; continue;
       }
 
@@ -41,23 +41,25 @@ void main() {
 
     for(var i = 0; i < decks.length; i++) {
       var encoded = deckEncoder.getCodeFromDeck(decks[i]);
-      expect(encoded, codes[i]);
-      var decoded = deckEncoder.getDeckFromCode(encoded);
+      var decoded = deckEncoder.getDeckFromCode(codes[i]);
+      var recoded = deckEncoder.getCodeFromDeck(decoded);
+      expect(encoded, recoded);
       expect(verifyRehydration(decks[i], decoded), true);
     }
+
   });
 
   test("order shouldn't matter", () {
 
     var decoder = DeckEncoder();
 
-    var deck1 = List<CardCodeAndCount>();
+    var deck1 = <CardCodeAndCount>[];
     deck1.add(CardCodeAndCount("01DE002", 1));
     deck1.add(CardCodeAndCount("01DE003", 2));
     deck1.add(CardCodeAndCount("02DE003", 3));
 
     
-    var deck2 = List<CardCodeAndCount>();
+    var deck2 = <CardCodeAndCount>[];
     deck2.add(CardCodeAndCount("01DE003", 2));
     deck2.add(CardCodeAndCount("02DE003", 3));
     deck2.add(CardCodeAndCount("01DE002", 1));
@@ -67,13 +69,13 @@ void main() {
 
     expect(code1.contains(code2), true);
 
-    var deck3 = List<CardCodeAndCount>();
+    var deck3 = <CardCodeAndCount>[];
     deck3.add(CardCodeAndCount("01DE002", 4));
     deck3.add(CardCodeAndCount("01DE003", 2));
     deck3.add(CardCodeAndCount("02DE003", 3));
 
     
-    var deck4 = List<CardCodeAndCount>();
+    var deck4 = <CardCodeAndCount>[];
     deck4.add(CardCodeAndCount("01DE003", 2));
     deck4.add(CardCodeAndCount("02DE003", 3));
     deck4.add(CardCodeAndCount("01DE002", 4));
@@ -86,7 +88,7 @@ void main() {
 
   test("bildge water set test", () {
     var decoder = DeckEncoder();
-    var deck = List<CardCodeAndCount>();
+    var deck = <CardCodeAndCount>[];
     deck.add(CardCodeAndCount("01DE002", 4));
     deck.add(CardCodeAndCount("02BW003", 2));
     deck.add(CardCodeAndCount("02BW010", 3));
@@ -99,7 +101,7 @@ void main() {
 
   test("mt targon set test", () {
     var decoder = DeckEncoder();
-    var deck = List<CardCodeAndCount>();
+    var deck = <CardCodeAndCount>[];
     deck.add(CardCodeAndCount("01DE002", 4));
     deck.add(CardCodeAndCount("03MT003", 2));
     deck.add(CardCodeAndCount("03MT010", 3));
@@ -112,14 +114,14 @@ void main() {
 
   test("Bad Version test", () {
     var decoder = DeckEncoder();
-    var deck = List<CardCodeAndCount>();
+    var deck = <CardCodeAndCount>[];
     deck.add(CardCodeAndCount("01DE002", 4));
     deck.add(CardCodeAndCount("01DE003", 2));
     deck.add(CardCodeAndCount("02DE003", 3));
     deck.add(CardCodeAndCount("01DE004", 5));
 
     var bytesFromDeck = base32.decode(decoder.getCodeFromDeck(deck));
-    var result = List<int>();
+    var result = <int>[];
     result.add(88); // invalid version
     var bytesFromDeckWithNewVersion = result + bytesFromDeck.getRange(1, bytesFromDeck.length).toList();
 

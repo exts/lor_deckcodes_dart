@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:base32/base32.dart';
 import 'package:lor_deck_codes/card_code_count.dart';
@@ -5,10 +6,13 @@ import 'package:lor_deck_codes/varint_translator.dart';
 
 class DeckEncoder {
   static const int CARD_CODE_LENGTH = 7;
-  static const int MAX_KNOWN_VERSION = 2;
+  static const int MAX_KNOWN_VERSION = 4;
+  static const int INITIAL_VERSION = 1;
+  static const int FORMAT = 1;
 
   Map<String, int> factionCodeToIntIdentifier = Map<String, int>();
   Map<int, String> intIdentifierToFactionCode = Map<int, String>();
+  Map<String, int> factionCodeToLibraryVersion = Map<String, int>();
 
   DeckEncoder() {
     factionCodeToIntIdentifier.addAll({
@@ -19,7 +23,9 @@ class DeckEncoder {
       'PZ': 4,
       'SI': 5,
       'BW': 6,
+      'SH': 7,
       'MT': 9,
+      'BC': 10,
     });
 
     intIdentifierToFactionCode.addAll({
@@ -30,12 +36,27 @@ class DeckEncoder {
       4: 'PZ',
       5: 'SI',
       6: 'BW',
+      7: 'SH',
       9: 'MT',
+      10: 'BC',
+    });
+
+    factionCodeToLibraryVersion.addAll({
+      'DE': 1,
+      'FR': 1,
+      'IO': 1,
+      'NX': 1,
+      'PZ': 1,
+      'SI': 1,
+      'BW': 2,
+      'MT': 2,
+      'SH': 3,
+      'BC': 4,
     });
   }
 
   List<CardCodeAndCount> getDeckFromCode(String code) {
-    var result = List<CardCodeAndCount>();
+    var result = <CardCodeAndCount>[];
 
     List<int> bytes;
 
@@ -116,18 +137,20 @@ class DeckEncoder {
   }
 
   List<int> getDeckCodeBytes(List<CardCodeAndCount> deck) {
-    var result = List<int>();
+    var result = <int>[];
 
     if (!validCardCodesAndCounts(deck)) {
       throw ArgumentError("The provided deck contains invalid card codes.");
     }
 
-    result.add(18);
+    int byte = (FORMAT << 4 | (getMinSupportedLibraryVersion(deck) & 0xF));
 
-    var of3 = List<CardCodeAndCount>();
-    var of2 = List<CardCodeAndCount>();
-    var of1 = List<CardCodeAndCount>();
-    var ofN = List<CardCodeAndCount>();
+    result.add(byte);
+
+    var of3 = <CardCodeAndCount>[];
+    var of2 = <CardCodeAndCount>[];
+    var of1 = <CardCodeAndCount>[];
+    var ofN = <CardCodeAndCount>[];
 
     for (var ccc in deck) {
       if (ccc.Count == 3) {
@@ -148,12 +171,12 @@ class DeckEncoder {
     var groupedOf3s = getGroupedOfs(of3);
     var groupedOf2s = getGroupedOfs(of2);
     var groupedOf1s = getGroupedOfs(of1);
-
+    
     //to ensure that the same decklist in any order produces the same code, do some sorting
     groupedOf3s = sortGroupOf(groupedOf3s);
     groupedOf2s = sortGroupOf(groupedOf2s);
     groupedOf1s = sortGroupOf(groupedOf1s);
-
+    
     //Nofs (since rare) are simply sorted by the card code - there's no optimiziation based upon the card count
     ofN.sort((a, b) => b.CardCode.compareTo(a.CardCode));
 
@@ -184,19 +207,6 @@ class DeckEncoder {
     }
   }
 
-  //The sorting convention of this encoding scheme is
-  //First by the number of set/faction combinations in each top-level list
-  //Second by the alphanumeric order of the card codes within those lists.
-  List<List<CardCodeAndCount>> sortGroupOf(
-      List<List<CardCodeAndCount>> groupOf) {
-    groupOf.sort((a, b) => a.length.compareTo(b.length));
-    for (var i = 0; i < groupOf.length; i++) {
-      groupOf[i].sort((a, b) => a.CardCode.compareTo(b.CardCode));
-      groupOf[i] = groupOf[i].toList();
-    }
-    return groupOf;
-  }
-
   int getCardSet(String code) {
     return int.parse(code.substring(0, 2));
   }
@@ -209,34 +219,55 @@ class DeckEncoder {
     return int.parse(code.substring(4, 7));
   }
 
-  List<List<CardCodeAndCount>> getGroupedOfs(List<CardCodeAndCount> list) {
-    List<List<CardCodeAndCount>> result = List<List<CardCodeAndCount>>();
-    while (list.isNotEmpty) {
-      List<CardCodeAndCount> currentSet = List<CardCodeAndCount>();
+  //The sorting convention of this encoding scheme is
+  //First by the number of set/faction combinations in each top-level list
+  //Second by the alphanumeric order of the card codes within those lists.
+  List<List<CardCodeAndCount>> sortGroupOf(
+      List<List<CardCodeAndCount>> groupOf) {
+    
+    groupOf.sort((a, b) => a.length.compareTo(b.length));
 
-      //get info from first
-      var firstCardCode = list[0].CardCode;
+    for (var i = 0; i < groupOf.length; i++) {
+      var tmp = groupOf[i];
 
-      int setNumber = getCardSet(firstCardCode);
-      String factionCode = getCardFaction(firstCardCode);
+      // first sort by group id
+      tmp.sort((a, b) {
+        return a.CardCode.substring(4, a.CardCode.length).compareTo(b.CardCode.substring(4, b.CardCode.length));
+      });
 
-      currentSet.add(list[0]);
-      list.removeAt(0);
-
-      for (var i = list.length - 1; i >= 0; i--) {
-        String currentCardCode = list[i].CardCode;
-        int currentSetNumber = getCardSet(currentCardCode);
-        String currentFactionCode = getCardFaction(currentCardCode);
-
-        if (currentSetNumber == setNumber &&
-            currentFactionCode == factionCode) {
-          currentSet.add(list[i]);
-          list.removeAt(i);
-        }
-      }
-      result.add(currentSet);
+      groupOf[i] = tmp.toList();
     }
-    return result;
+
+    return groupOf;
+  }
+
+  List<List<CardCodeAndCount>> getGroupedOfs(List<CardCodeAndCount> list) {
+    List<List<CardCodeAndCount>> result = <List<CardCodeAndCount>>[];
+
+    Map<int, List<CardCodeAndCount>> tmp = {};
+    List<List<CardCodeAndCount>> factions = [];
+
+    for(var item in list) {
+      
+      int factionCode = factionCodeToIntIdentifier.containsKey(getCardFaction(item.CardCode)) ? factionCodeToIntIdentifier[getCardFaction(item.CardCode)] : -1;
+      if(factionCode == -1) {
+        throw new Exception("Card code invalid.");
+      }
+      
+      if(!tmp.containsKey(factionCode)) {
+        tmp[factionCode] = [];
+      }
+
+      tmp[factionCode].add(item);
+    }
+
+    // sort by faction then create said list before properly sorting codes
+    var fKeys = tmp.keys.toList()..sort();
+    for(var k in fKeys) {
+      factions.add(tmp[k]);
+    }
+
+    return factions;
   }
 
   void encodeGroupOf(List<int> bytes, List<List<CardCodeAndCount>> groupOf) {
@@ -288,5 +319,17 @@ class DeckEncoder {
     }
 
     return true;
+  }
+
+  int getMinSupportedLibraryVersion(List<CardCodeAndCount> deck) {
+    if(deck.isEmpty) {
+      return INITIAL_VERSION;
+    }
+
+    var codes = deck.map<String>((ccc) => ccc.CardCode.substring(2, 4)).toList();
+    var libCodes = codes.map((factionCode) => factionCodeToLibraryVersion.containsKey(factionCode) 
+                              ? factionCodeToLibraryVersion[factionCode] : MAX_KNOWN_VERSION).toList();
+
+    return libCodes.reduce(max);
   }
 }
