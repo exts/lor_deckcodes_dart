@@ -28,3 +28,9 @@
 - Added support for Mt Targon
 - Added new Mt Targon test
 - Added new bad version test to mimic official repo
+
+## 1.0.6
+
+- Added support for Bandle City
+- Fixed tests to use new tests
+- Fixed bug regarding receiving deck codes in tests out of order and sorted into the respective order to produce the correct codes
