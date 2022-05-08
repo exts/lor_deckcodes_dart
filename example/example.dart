@@ -5,28 +5,26 @@ import 'package:lor_deck_codes/deck_encoder.dart';
 void main() {
   var deckEncoder = DeckEncoder();
   var decoded = deckEncoder
-      .getDeckFromCode("CEBAIAIAC4QSUMAHAECAIHZMGEZTIOABAIAQIDQYAEBQCAAHEAZA");
+      .getDeckFromCode("CEBQOBIEAYEQUDIOB4RQGAIEBAFDKAYFBJDKIAO7AEAACAIBAQMQ");
   for (var cards in decoded) {
     print("x${cards.Count} - ${cardCodeToString(cards.CardCode)}");
   }
 
   // outputs:
-  // x3 - [Demacia] Mageseeker Investigator - Play: If you cast a spell this round, remove all text and keywords from an enemy follower.
-  // x3 - [Demacia] Remembrance - Costs 1 less for each ally that died this round. Summon a random 5 cost follower from Demacia.
-  // x3 - [Demacia] Lux's Prismatic Barrier - Give an ally Barrier this round. Shuffle a Lux into your deck.
-  // x3 - [Demacia] Mageseeker Inciter - Play: Discard a spell to grant me Power equal to its cost.
-  // x3 - [Piltover & Zaun] Trueshot Barrage - Deal 3 to an enemy, 2 to another, 1 to another.
-  // x3 - [Piltover & Zaun] Statikk Shock - Deal 1 to two enemies. Draw 1.
-  // x3 - [Piltover & Zaun] Chempunk Shredder - Play: Deal 1 to all enemy units.
-  // x3 - [Piltover & Zaun] Progress Day! - Draw 3, then reduce their cost by 1.
-  // x3 - [Piltover & Zaun] Funsmith - All of your spells and Skills deal 1 extra damage.
-  // x3 - [Piltover & Zaun] Mystic Shot - Deal 2 to anything.
-  // x3 - [Piltover & Zaun] Heimerdinger - When you cast a spell, create a Fleeting Turret in hand with equal cost. It costs 0 this round.
-  // x2 - [Piltover & Zaun] Unlicensed Innovation - Summon an Illegal Contraption.
-  // x2 - [Piltover & Zaun] Unstable Voltician - When I'm summoned, grant me +4|+0 and Quick Attack if you've cast a 6+ cost spell this game.
-  // x1 - [Demacia] Judgment - A battling ally strikes all battling enemies.
-  // x1 - [Demacia] Prismatic Barrier - Give an ally Barrier this round.
-  // x1 - [Demacia] Purify - Remove all text and keywords from a follower.
+  // x3 - [Piltover & Zaun] Caitlyn - Strike: Plant 2 Flashbomb Traps randomly in the top 8 cards in the enemy deck.
+  // x3 - [Piltover & Zaun] Sting Officer - Nexus Strike: Plant 2 Flashbomb Traps randomly in the top 8 cards of the enemy deck.
+  // x3 - [Piltover & Zaun] Advanced Intel - Plant 2 Flashbomb Traps randomly in the top 8 cards of the enemy deck.
+  // x3 - [Piltover & Zaun] Piltover Peacemaker - Deal 2 to a unit and plant 2 Flashbomb Traps randomly in the top 8 cards of the enemy deck.
+  // x3 - [Piltover & Zaun] Corina, Mastermind - Play: Plant 5 Flashbomb Traps randomly or activate the effects of all traps in the top 5 cards of the enemy deck.
+  // x3 - [Piltover & Zaun] Justice Rider - Whenever your opponent draws, plant 1 Flashbomb Trap randomly in the top 8 cards in the enemy deck. 
+  // x3 - [Piltover & Zaun] Stinky Whump - Last Breath: Create a copy of me in the enemy deck with 2 Poison Puffcaps attached. 
+  // x3 - [Piltover & Zaun, Bandle City] Teemo - Nexus Strike: Plant 5 Poison Puffcaps on random cards in the enemy deck.
+  // x3 - [Piltover & Zaun] Mushroom Cloud - Plant 5 Poison Puffcaps on random cards in the enemy deck.
+  // x3 - [Piltover & Zaun] Clump of Whumps - When I'm summoned, create a Mushroom Cloud in hand.
+  // x3 - [Bandle City] Ava Achiever - When I'm summoned or Round End: Plant 3 Poison Puffcaps on random cards in the enemy deck.  Traps on enemy cards are doubled when activated.
+  // x3 - [Bandle City] Poison Dart - Deal 1 to anything and plant 3 Poison Puffcaps on random cards in the enemy deck. 
+  // x3 - [Bandle City] Entrapment - Pick 1 of 3 units or spells from the enemy deck and plant 3 Poison Puffcaps on all copies of it.
+  // x1 - [Piltover & Zaun] Puffcap Peddler - When you play a spell, plant 3 Poison Puffcaps on random cards in the enemy deck.
 
   decoded = deckEncoder
       .getDeckFromCode("CEAQIAIDB4SSMNYDAIBAMLJ4AMBAGAYEBIDQCAYCAUGB4KBQGQBQCAQGCYAQEAYGAIAQGFRK");
@@ -67,7 +65,7 @@ List<dynamic> loadSetData(int setNumber) {
 }
 
 String cardCodeToString(String dataCode) {
-  var sets = [1, 2];
+  var sets = [1, 2, 3, 4, 5];
   var cards = List<dynamic>();
 
   for(var currentSet in sets) {
@@ -84,13 +82,13 @@ String cardCodeToString(String dataCode) {
     var code = card["cardCode"] ?? null;
     if (!code.toString().contains(dataCode)) continue;
 
-    var region = card["region"] ?? null;
+    var region = card["regions"] ?? null;
     var name = card["name"] ?? null;
     var desc = (card["descriptionRaw"]) as String ?? null;
     desc = desc?.replaceAll("\r\n", " ");
     desc = desc?.replaceAll("\n", " ");
 
-    return "[$region] $name" + (desc.isNotEmpty ? " - $desc" : "");
+    return "[${region.join(", ")}] $name" + (desc.isNotEmpty ? " - $desc" : "");
   }
 
   throw ArgumentError("Card not found");
