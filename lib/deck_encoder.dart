@@ -6,7 +6,7 @@ import 'package:lor_deck_codes/varint_translator.dart';
 
 class DeckEncoder {
   static const int CARD_CODE_LENGTH = 7;
-  static const int MAX_KNOWN_VERSION = 4;
+  static const int MAX_KNOWN_VERSION = 5;
   static const int INITIAL_VERSION = 1;
   static const int FORMAT = 1;
 
@@ -26,6 +26,7 @@ class DeckEncoder {
       'SH': 7,
       'MT': 9,
       'BC': 10,
+      'RU': 12,
     });
 
     intIdentifierToFactionCode.addAll({
@@ -39,6 +40,7 @@ class DeckEncoder {
       7: 'SH',
       9: 'MT',
       10: 'BC',
+      12: 'RU',
     });
 
     factionCodeToLibraryVersion.addAll({
@@ -52,6 +54,7 @@ class DeckEncoder {
       'MT': 2,
       'SH': 3,
       'BC': 4,
+      'RU': 5,
     });
   }
 

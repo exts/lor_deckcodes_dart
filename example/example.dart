@@ -9,6 +9,7 @@ void main() {
   for (var cards in decoded) {
     print("x${cards.Count} - ${cardCodeToString(cards.CardCode)}");
   }
+  printNl();
 
   // outputs:
   // x3 - [Piltover & Zaun] Caitlyn - Strike: Plant 2 Flashbomb Traps randomly in the top 8 cards in the enemy deck.
@@ -31,6 +32,7 @@ void main() {
   for (var cards in decoded) {
     print("x${cards.Count} - ${cardCodeToString(cards.CardCode)}");
   }
+  printNl();
 
   // outputs (borrowed: https://lor.mobalytics.gg/decks/br0lsulbunq760h24740)
   // x3 - [Noxus] Precious Pet
@@ -53,6 +55,50 @@ void main() {
   // x1 - [Noxus] Citybreaker - Round Start: Deal 1 to the enemy Nexus.
   // x1 - [Noxus] Noxian Guillotine - Kill a damaged unit.  You can cast this again this round.
   // x1 - [Noxus] Katarina - Play: Rally. Strike: Recall me.
+  
+  decoded = deckEncoder
+      .getDeckFromCode("CIBQEAQGAECQGBAAAIBQYBIGAYDAODY4EMBQCAIABEAQKAAUAMDAMCYQDYAA");
+  for (var cards in decoded) {
+    print("x${cards.Count} - ${cardCodeToString(cards.CardCode)}");
+  }
+  printNl();
+
+  // outputs
+  // x3 - [Bilgewater] Ye Been Warned - Give an enemy Vulnerable this round. If it dies this round, draw 1.
+  // x3 - [Bilgewater] Hired Gun - When I'm summoned, grant the strongest enemy Vulnerable.
+  // x3 - [Demacia] Golden Aegis - Give an ally Barrier this round. Rally.
+  // x3 - [Demacia] Cataclysm - An ally starts a free attack Challenging an enemy.
+  // x3 - [Demacia] Field Promotion - The next time you play a unit this round, grant it Scout. It's now an Elite.
+  // x3 - [Bilgewater] Illaoi - Attack: Spawn 1, then I gain Power equal to your strongest Tentacle's Power this round.
+  // x3 - [Bilgewater] Watchful Idol - Round Start: Deal 2 to me and Spawn 1.
+  // x3 - [Bilgewater] Answered Prayer - Spawn 2, or spend 5 mana to Spawn 4 instead.
+  // x3 - [Bilgewater] Tentacle Smash - Spawn 3, then your strongest Tentacle and an enemy strike each other.
+  // x3 - [Bilgewater] The Sea's Voice - Attack: Spawn 1 and give your strongest Tentacle Overwhelm this round.
+  // x2 - [Demacia] Brightsteel Protector - Play: Give an ally Barrier this round.
+  // x2 - [Demacia] Shield of Durand - Grant an ally +0|+3. At the next Round Start, grant it +0|+2.
+  // x2 - [Bilgewater] Nagakabouros - Round Start: Spawn 2. Then, if your strongest Tentacle has 12+ Power, create a Nagakabouros' Tantrum in hand.
+  // x2 - [Bilgewater] Buhru Lookout - When I'm summoned, Spawn 3.
+  // x2 - [Bilgewater] Eye of Nagakabouros - Spawn 2. Draw 2.
+}
+
+// bad practice, but this is just an example
+var cards = getCards();
+
+List<dynamic> getCards() {
+  var sets = [1, 2, 3, 4, 5, 6];
+  var cards = <dynamic>[];
+
+  for(var currentSet in sets) {
+    var data = loadSetData(currentSet);
+    if(data.isEmpty) continue;
+    cards.addAll(data);
+  }
+
+  if (cards.isEmpty) {
+    throw FileSystemException("Set data couldn't be loaded");
+  }
+
+  return cards;
 }
 
 List<dynamic> loadSetData(int setNumber) {
@@ -65,23 +111,13 @@ List<dynamic> loadSetData(int setNumber) {
 }
 
 String cardCodeToString(String dataCode) {
-  var sets = [1, 2, 3, 4, 5];
-  var cards = List<dynamic>();
-
-  for(var currentSet in sets) {
-    var data = loadSetData(currentSet);
-    if(data.isEmpty) continue;
-    cards.addAll(data);
-  }
-
-  if (cards.isEmpty) {
-    throw FileSystemException("Set data couldn't be loaded");
-  }
-
   for (var card in cards) {
     var code = card["cardCode"] ?? null;
-    if (!code.toString().contains(dataCode)) continue;
-
+    if(code == null) {
+      continue;
+    }
+    if(code != dataCode) continue;
+    
     var region = card["regions"] ?? null;
     var name = card["name"] ?? null;
     var desc = (card["descriptionRaw"]) as String ?? null;
@@ -98,4 +134,8 @@ Map<String, dynamic> dataToMap(Map<String, dynamic> list) {
   return {
     "region": list["region"] ?? null,
   };
+}
+
+void printNl() {
+  print("");
 }

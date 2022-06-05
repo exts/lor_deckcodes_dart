@@ -112,6 +112,20 @@ void main() {
     expect(verifyRehydration(deck, decoded), true);
   });
 
+
+  test("ru runeterra set test", () {
+    var decoder = DeckEncoder();
+    var deck = <CardCodeAndCount>[];
+    deck.add(CardCodeAndCount("01DE002", 4));
+    deck.add(CardCodeAndCount("03MT003", 2));
+    deck.add(CardCodeAndCount("03MT010", 3));
+    deck.add(CardCodeAndCount("02BW004", 5));
+
+    var code = decoder.getCodeFromDeck(deck);
+    var decoded = decoder.getDeckFromCode(code);
+    expect(verifyRehydration(deck, decoded), true);
+  });
+
   test("Bad Version test", () {
     var decoder = DeckEncoder();
     var deck = <CardCodeAndCount>[];
